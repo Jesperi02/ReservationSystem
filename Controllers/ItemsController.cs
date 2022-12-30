@@ -34,8 +34,16 @@ namespace ReservationSysten22.Controllers
             return Ok(await _service.GetItemsAsync());
         }
 
+        // GET: api/Items/user/username
+        [HttpGet("user/{username}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Item>>> GetItems(string username)
+        {
+            return Ok(await _service.GetItemsAsync(username));
+        }
+
         // GET: api/Items/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [Authorize]
         public async Task<ActionResult<Item>> GetItem(long id)
         {
@@ -49,9 +57,17 @@ namespace ReservationSysten22.Controllers
             return Ok(item);
         }
 
+        // GET: api/Items/query
+        [HttpGet("{query}")]
+        [Authorize]
+        public async Task<ActionResult<Item>> QueryItems(string query)
+        {
+            return Ok(await _service.QueryItemsAsync(query));
+        }
+
         // PUT: api/Items/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [Authorize]
         public async Task<IActionResult> PutItem(long id, ItemDTO itemDTO)
         {

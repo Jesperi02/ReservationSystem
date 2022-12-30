@@ -55,6 +55,19 @@ namespace ReservationSysten22.Services
             return itemDTOList;
         }
 
+        public async Task<IEnumerable<ItemDTO>> QueryItemsAsync(string query)
+        {
+            IEnumerable<Item> itemList = await _itemRepository.QueryItemsAsync(query);
+            List<ItemDTO> itemDTOList = new List<ItemDTO>();
+
+            foreach(Item item in itemList)
+            {
+                itemDTOList.Add(ItemToDTO(item));
+            }
+
+            return itemDTOList;
+        }
+
         public async Task<ItemDTO> GetItemAsync(long id)
         {
             Item item = await _itemRepository.GetItemAsync(id);
@@ -70,6 +83,26 @@ namespace ReservationSysten22.Services
             return ItemToDTO(item);
         }
 
+        public async Task<IEnumerable<ItemDTO>> GetItemsAsync(string username)
+        {
+            User owner = await _userRepository.GetUserAsync(username);
+
+            if (owner == null)
+            {
+                return null;
+            }
+
+            IEnumerable<Item> itemList = await _itemRepository.GetItemsAsync(owner);
+            List<ItemDTO> itemDTOList = new List<ItemDTO>();
+
+            foreach (Item item in itemList)
+            {
+                itemDTOList.Add(ItemToDTO(item));
+            }
+
+            return itemDTOList;
+        }
+
         public async Task<ItemDTO> UpdateItemAsync(ItemDTO itemDTO)
         {
             Item item = await _itemRepository.GetItemAsync(itemDTO.Id);
@@ -79,8 +112,16 @@ namespace ReservationSysten22.Services
                 return null;
             }
 
-            item.Name = itemDTO.Name;
-            item.Description = itemDTO.Description;
+            if (itemDTO.Name.Length > 0)
+            {
+                item.Name = itemDTO.Name;
+            }
+
+            if (itemDTO.Description.Length > 0)
+            {
+                item.Description = itemDTO.Description;
+            }
+
             item.accessCount++;
 
             if (itemDTO.Images != null)
@@ -100,11 +141,6 @@ namespace ReservationSysten22.Services
             }
 
             Item updatedItem = await _itemRepository.UpdateItemAsync(item);
-
-            if (updatedItem == null)
-            {
-                return null;
-            }
 
             return ItemToDTO(updatedItem);
         }

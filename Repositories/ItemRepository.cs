@@ -79,6 +79,16 @@ namespace ReservationSysten22.Repositories
 
         }
 
+        public async Task<IEnumerable<Item>> GetItemsAsync(User user)
+        {
+            return await _context.Items.Include(i => i.Owner).Where(x => x.Owner == user).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Item>> QueryItemsAsync(string query)
+        {
+            return await _context.Items.Include(i => i.Owner).Where(x => x.Name.Contains(query)).ToListAsync();
+        }
+
         public async Task<Item> UpdateItemAsync(Item item)
         {
             _context.Entry(item).State = EntityState.Modified;

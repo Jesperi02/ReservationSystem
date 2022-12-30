@@ -77,7 +77,37 @@ namespace ReservationSysten22.Services
 
         public async Task<UserDTO> UpdateUserAsync(User user)
         {
-            User returnedUser = await _repository.UpdateUserAsync(user);
+            User dbUser = await _repository.GetUserAsync(user.Id);
+
+            if (user.UserName.Length > 0)
+            {
+                dbUser.UserName = user.UserName;
+            }
+
+            if (user.FirstName.Length > 0)
+            {
+                dbUser.FirstName = user.FirstName;
+            }
+
+            if (user.LastName.Length > 0)
+            {
+                dbUser.LastName = user.LastName;
+            }
+
+            if (user.Password.Length > 0)
+            {
+                string hashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                    password: user.Password,
+                    salt: dbUser.Salt,
+                    prf: KeyDerivationPrf.HMACSHA256,
+                    iterationCount: 10000,
+                    numBytesRequested: 256 / 8
+                ));
+
+                dbUser.Password = hashedPassword;
+            }
+
+            User returnedUser = await _repository.UpdateUserAsync(dbUser);
             return UserToDTO(returnedUser);
         }
 
