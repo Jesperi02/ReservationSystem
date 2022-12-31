@@ -54,6 +54,15 @@ namespace ReservationSysten22.Repositories
             return await _context.Reservations.ToListAsync();
         }
 
+        public async Task<IEnumerable<Reservation>> GetReservationsAsync(Item target, DateTime start, DateTime end)
+        {
+            return await _context.Reservations.Include(i => i.Owner).Include(x => x.Target).Where(x =>
+                x.Target == target && 
+                x.StartTime <= end && 
+                x.EndTime >= start
+            ).ToListAsync();
+        }
+
         public async Task<Reservation> UpdateReservationAsync(Reservation reservation)
         {
             _context.Entry(reservation).State = EntityState.Modified;

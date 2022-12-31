@@ -88,6 +88,11 @@ namespace ReservationSysten22.Middleware
             User? user = await _context.Users.Where(x => x.UserName == username).FirstOrDefaultAsync();
             Reservation? dbReservation = await _context.Reservations.Include(i => i.Owner).FirstOrDefaultAsync(i => i.Id == reservationDTO.Id);
 
+            if (dbReservation == null && reservationDTO.Owner == user.UserName) // uusi itemi
+            {
+                return true;
+            }
+
             return user.Id == dbReservation.Owner.Id;
         }
     }

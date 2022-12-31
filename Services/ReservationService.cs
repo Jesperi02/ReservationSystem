@@ -19,9 +19,28 @@ namespace ReservationSysten22.Services
 
         public async Task<ReservationDTO> CreateReservationAsync(ReservationDTO dto)
         {
+            if (dto.StartTime >= dto.EndTime || dto.EndTime <= dto.StartTime)
+            {
+                return null;
+            }
+
+            Item target = await _itemRepository.GetItemAsync(dto.Target);
+
+            if (target == null)
+            {
+                return null;
+            }
+
+            IEnumerable<Reservation> reservations = await _reservationRepository.GetReservationsAsync(target, dto.StartTime, dto.EndTime);
+
+            if (reservations.Count() > 0)
+            {
+                return null;
+            }
+
             Reservation reservation = await DTOToReservation(dto);
-            await _reservationRepository.AddReservationAsync(reservation);
-            return ReservationToDTO(reservation);
+            Reservation created = await _reservationRepository.AddReservationAsync(reservation);
+            return ReservationToDTO(created);
         }
 
         public async Task<bool> DeleteReservationAsync(ReservationDTO dto)
@@ -71,6 +90,9 @@ namespace ReservationSysten22.Services
                 dto.Target = reservation.Target.Id;
             }
 
+            dto.StartTime = reservation.StartTime;
+            dto.EndTime = reservation.EndTime;
+
             return dto;
         }
 
@@ -82,15 +104,21 @@ namespace ReservationSysten22.Services
             User owner = await _userRepository.GetUserAsync(dto.Owner);
             Item target = await _itemRepository.GetItemAsync(dto.Target);
 
-            if (owner != null)
+            if (owner == null)
             {
-                reservation.Owner = owner;
+                return null;
             }
 
-            if (target != null)
+            if (target == null)
             {
-                reservation.Target = target;
+                return null;
             }
+
+            reservation.Id = dto.Id;
+            reservation.Owner = owner;
+            reservation.Target = target;
+            reservation.StartTime = dto.StartTime;
+            reservation.EndTime = dto.EndTime;
 
             return reservation;
         }

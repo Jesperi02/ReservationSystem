@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -78,10 +79,10 @@ namespace ReservationSysten22.Controllers
         // POST: api/Reservations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
+        [Authorize]
+        public async Task<ActionResult<ReservationDTO>> PostReservation(ReservationDTO reservationDTO)
         {
             // Tarkista oikeudet
-            ReservationDTO reservationDTO = await _service.GetReservationAsync(reservation.Id);
             bool isAllowed = await _authenticationService.isAllowed(this.User.FindFirst(ClaimTypes.Name).Value, reservationDTO);
 
             if (!isAllowed)
@@ -93,7 +94,7 @@ namespace ReservationSysten22.Controllers
 
             if (createdDTO == null)
             {
-                return Problem();
+                return BadRequest();
             }
 
             return CreatedAtAction("GetItem", new { id = createdDTO.Id }, createdDTO);
