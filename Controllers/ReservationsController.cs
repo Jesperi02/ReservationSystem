@@ -97,7 +97,8 @@ namespace ReservationSysten22.Controllers
                 return BadRequest();
             }
 
-            return CreatedAtAction("GetItem", new { id = createdDTO.Id }, createdDTO);
+            //return CreatedAtAction("GetItem", new { id = createdDTO.Id }, createdDTO);
+            return CreatedAtAction("PostAsync", createdDTO);
         }
 
         // DELETE: api/Reservations/5
